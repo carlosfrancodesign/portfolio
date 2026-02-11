@@ -14,16 +14,14 @@
 
   <style>
     :root {
-      --bg: #ececc7;
-      --text: #2b4227;
-      --primary: #45744E;
-      --accent: #AD98FF;
+      --bg: #fefffc;
+      --text: #1c201c;
+      --accent: #4fcc53;
       --width: 60vw;
 
       /* Dark mode colors */
-      --bg-dark: #2b4227;
-      --text-dark: #ececc7;
-      --primary-dark: #4CAF50;
+      --bg-dark: #0a0f09;
+      --text-dark: #e6ebd7;
       --accent-dark: #aeb0f3;
     }
 
@@ -31,7 +29,6 @@
     body.dark-mode {
       --bg: var(--bg-dark);
       --text: var(--text-dark);
-      --primary: var(--primary-dark);
       --accent: var(--accent-dark);
     }
 
@@ -111,8 +108,8 @@
       font-weight: 400;
       font-style: normal;
       text-decoration: none;
-      text-transform: uppercase;
-    }
+      text-transform: lowercase;
+    } 
 
     h2 {
       font-family: 'NeueHaasDisplay', sans-serif;
@@ -128,12 +125,49 @@
       z-index: 2;
       font-family: 'NeueHaasDisplay', sans-serif;
       font-weight: 400;
-      text-transform: uppercase;
+      text-transform: lowercase;
       font-size: 1em;
       line-height: 1.4;
       text-align: justify;
       opacity: 1;
     }
+
+    .bio p {
+      margin: 0;
+      padding: 0;
+    }
+
+    .bio em {
+        font-family: 'FoundersGrotesk', sans-serif;
+        font-size: 0.8em;
+        color: var(--accent);
+        line-height: 0;
+        text-transform: uppercase;
+        text-decoration: none;
+        font-style: normal;
+      }
+
+    .bio {
+      position: fixed;
+      max-width: 30vh;
+      top: 20px;
+      right: 20px;
+      z-index: 2;
+      font-family: 'NeueHaasDisplay', sans-serif;
+      font-weight: 400;
+      text-transform: lowercase;
+      font-size: 1em;
+      line-height: 1.4;
+      text-align: justify;
+      opacity: 1;
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .bio.scrolled {
+      opacity: 0 !important;
+      pointer-events: none;
+    }
+
 
     .toggle p {
       margin: 0;
@@ -160,21 +194,21 @@
       opacity: 0;
     }
 
+    /*'CONTACT'*/
     ul a {
       position: fixed;
-      top: 20px;
-      right: 20px;
+      bottom: 20px;
+      left: 20px;
       background: none;
       border: none;
       outline: none;
       box-shadow: none;
       color: var(--text);
-      text-transform: uppercase;
       text-decoration: none;
       font-style: normal;
       font-family: 'NeueHaasDisplay', sans-serif;
       font-weight: 400;
-      text-transform: uppercase;
+      text-transform: lowercase;
       font-size: 1em;
       line-height: 1.4;
     }
@@ -187,11 +221,10 @@
     /* Wordmark/Logo */
     .hero {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      top: 20px;
+      left: 20px;
       z-index: 1;
-      width: 40vh;
+      width: 30vh;
       opacity: 1;
       transition: opacity 0.5s ease;
     }
@@ -228,7 +261,6 @@
       padding-bottom: 0;
       position: relative;
       z-index: 2;
-      /*outline: 2px solid red;*/
     }
 
     /* Hard-coded image dimensions: 4897 ✕ 3265 – aspect-ratio fixes this */
@@ -240,7 +272,6 @@
       display: block;
       margin: 0 auto;
       transition: transform 0.3s ease, opacity 0.4s ease;
-      border-radius: 4px;
     }
 
     .content-grid h2 {
@@ -292,7 +323,7 @@
     .scroll {
       font-family: 'NeueHaasDisplay', sans-serif;
       font-weight: 400;
-      text-transform: uppercase;
+      text-transform: lowercase;
       font-size: 1em;
       color: var(--text);
       animation: bounce 1.5s infinite cubic-bezier(0.68, -0.56, 0.265, 1.55);
@@ -338,7 +369,7 @@
       pointer-events: auto;
       cursor: none;
       font-family: 'FoundersGrotesk', sans-serif;
-      text-transform: uppercase;
+      text-transform: lowercase;
       font-size: 2rem;
       font-weight: 700;
     }
@@ -375,11 +406,11 @@
       font-family: 'NeueHaasDisplay', sans-serif;
       font-size: 1em;
       font-weight: 400;
-      text-transform: uppercase;
+      text-transform: lowercase;
       text-align: center;
       max-width: 125px;
       white-space: normal;
-      line-height: 1.5;
+      line-height: 1.2;
       opacity: 0;
       transition: opacity 0.2s ease-in;
       pointer-events: none;
@@ -490,6 +521,10 @@
       }
 
       .scroll-container {
+        display: none !important;
+      }
+
+      .bio {
         display: none !important;
       }
 
@@ -812,6 +847,14 @@
     <p>space to toggle</p>
   </div>
 
+  <div class="bio">
+    <p>is a multidisciplinary artist and designer based in texas <em>✦</em> he studied arts and technology at <em>the university
+      of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
+      nature
+      and science</em> <em>✦</em> he has been practicing freelance graphic design since what is now known as frutiger aero <em>✦</em>
+    </p>
+  </div>
+
   <div class="scroll-container">
     <div class="content-grid">
       <div class="item" data-subtitle="Telecom Electric Supply">
@@ -820,14 +863,14 @@
           <img src="./assets/images/TES_Ads_Mockup_02.jpg">
         </a>
       </div>
-		      <div class="item" data-subtitle="Re-imagining Whataburger">
-        <a href="https://app.box.com/s/wp746yqr9ycg23v378t6vyi5wfou532k" target="_blank">
-          <img src="https://carlosfrancoweb.files.wordpress.com/2021/03/wb-hero-02.jpg">
-        </a>
-      </div>
       <div class="item" data-subtitle="Perot Museum of Nature and Science">
         <a href="https://labs.perotmuseum.org/exhibits/PowTex/" target="_blank">
           <img src="./assets/images/PowTex_Mockup.png">
+        </a>
+      </div>
+      <div class="item" data-subtitle="Re-imagining Whataburger">
+        <a href="https://www.dropbox.com/scl/fi/omcxjcnyrsjzjgl2ffvwi/senior-capstone.reimagining-whataburger-2020.pdf?rlkey=761hkykguz5r0d17otklwuary&st=k9999xno&dl=0" target="_blank">
+          <img src="https://carlosfrancoweb.files.wordpress.com/2021/03/wb-hero-02.jpg">
         </a>
       </div>
       <div class="item" data-subtitle="Baldwin's Code">
@@ -894,6 +937,10 @@
     const hero = document.querySelector('.hero');
     const toggle = document.querySelector('.toggle');
     const outro = document.querySelector('.scroll-outro');
+    const bio = document.querySelector('.bio');
+
+    // Flag to determine if user has entered past the overlay (for dark mode toggling)
+    let hasEntered = false;
 
     window.addEventListener('DOMContentLoaded', () => {
       document.addEventListener('click', () => {
@@ -944,7 +991,7 @@
 
       // Remove all timeouts and delays for image preview
       let previewTimeout;
-      
+
       function showImagePreview(imgSrc, title) {
         // Clear any existing timeout and hide current preview
         if (previewTimeout) {
@@ -1057,11 +1104,14 @@
           setTimeout(() => {
             overlay.remove();
             updateCursorState();
+            hasEntered = true; // Only now let color mode toggle be enabled
           }, 500);
         });
       } else {
         const overlay = document.getElementById('safari-overlay');
         if (overlay) overlay.remove();
+        // If there's no overlay, we're already "entered"
+        hasEntered = true;
       }
 
       window.addEventListener('wheel', (e) => {
@@ -1082,21 +1132,25 @@
 
         if (Math.abs(velocity) < 0.05) velocity = 0;
 
+        // Handle scrolled classes for hero, navbar, toggle, scrollIndicator, and bio
         if (scrollY > 10 && scrollY < maxScroll - 10) {
           navbar?.classList.add('scrolled');
           hero?.classList.add('scrolled');
           toggle?.classList.add('scrolled');
           scrollIndicator?.classList.add('hidden');
+          bio?.classList.add('scrolled');
         } else if (scrollY <= 10) {
           navbar?.classList.remove('scrolled');
           hero?.classList.remove('scrolled');
           toggle?.classList.remove('scrolled');
           scrollIndicator?.classList.remove('hidden');
+          bio?.classList.remove('scrolled');
         } else {
           navbar?.classList.add('scrolled');
           hero?.classList.add('scrolled');
           toggle?.classList.add('scrolled');
           scrollIndicator?.classList.add('hidden');
+          bio?.classList.add('scrolled');
         }
 
         document.querySelectorAll('.item').forEach(item => {
@@ -1266,18 +1320,21 @@
       console.log("toggled");
     }
 
-    // Toggle dark/light mode on any click on the screen, except anchor links
+    // Toggle dark/light mode on any click on the screen, except anchor links and except Home (return-to-top), but
+    // disable toggle until after initial overlay enter (hasEntered)
     document.addEventListener('click', (event) => {
       // Check if the clicked element is an anchor or is inside an anchor
       const isAnchorClick = event.target.closest('a');
-
-      if (!isAnchorClick) {
+      // Check if the clicked element is or is inside 'return-to-top' (home button)
+      const isHomeClick = event.target.closest('#return-to-top');
+      // Ignore click for dark mode until after overlay is gone
+      if (hasEntered && !isAnchorClick && !isHomeClick) {
         toggleDarkMode(event);
       }
     });
 
     document.addEventListener('keydown', (event) => {
-      if (event.key === " ") {
+      if (hasEntered && event.key === " ") {
         toggleDarkMode(event);
       }
     });
