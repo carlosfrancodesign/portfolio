@@ -495,12 +495,25 @@
       html,
       body {
         height: 100vh;
+        overflow: auto;
+        cursor: auto;
+      }
+
+      body {
+        overflow-y: auto;
       }
 
       .cursor-container,
       #scroll-indicator,
       #safari-overlay {
         display: none !important;
+      }
+
+      a,
+      button,
+      input,
+      textarea {
+        cursor: auto;
       }
 
       /* experimenting */
@@ -711,7 +724,7 @@
       .mobile-bio {
         margin-top: 20px;
         max-height: none;
-        line-height: 1.3;
+        line-height: 1.5;
         text-align: justify;
         width: 100vw !important;
       }
@@ -729,7 +742,7 @@
       .mobile-bio p,
       .mobile-list h3,
       .mobile-list li {
-        font-size: clamp(12pt, 3.5vw, 16pt);
+        font-size: clamp(10pt, 3.5vw, 16pt);
       }
 
       .mobile-list h3 {
@@ -1061,10 +1074,10 @@
           previewContainer.style.opacity = '1';
         }, 10);
 
-        // Auto-hide after 2 seconds
+        // Auto-hide after 5 seconds (longer preview on mobile/desktop)
         previewTimeout = setTimeout(() => {
           hideImagePreview();
-        }, 2000);
+        }, 5000);
       }
 
       function hideImagePreview() {
@@ -1097,16 +1110,27 @@
       if (isSafari) {
         const overlay = document.getElementById('safari-overlay');
 
-        overlay.addEventListener('click', () => {
-          overlay.classList.add('hidden');
-
-          // Delay full removal so transition completes
-          setTimeout(() => {
+        if (overlay) {
+          // On mobile Safari the overlay is visually hidden via CSS, so
+          // remove it immediately and allow dark mode without a click.
+          if (isMobile) {
             overlay.remove();
-            updateCursorState();
-            hasEntered = true; // Only now let color mode toggle be enabled
-          }, 500);
-        });
+            hasEntered = true;
+          } else {
+            overlay.addEventListener('click', () => {
+              overlay.classList.add('hidden');
+
+              // Delay full removal so transition completes
+              setTimeout(() => {
+                overlay.remove();
+                updateCursorState();
+                hasEntered = true; // Only now let color mode toggle be enabled
+              }, 500);
+            });
+          }
+        } else {
+          hasEntered = true;
+        }
       } else {
         const overlay = document.getElementById('safari-overlay');
         if (overlay) overlay.remove();
@@ -1281,23 +1305,9 @@
 
     });
 
-    // Disable fake scroll and cursor if on mobile/touch
+    // Disable fake scroll and cursor behavior flag for mobile/touch;
+    // CSS handles hiding the custom cursor and enabling native scroll.
     const isMobile = /Mobi|Android|iPhone|iPad|iPod|Touch/.test(navigator.userAgent) || window.innerWidth < 769;
-
-    if (isMobile) {
-      window.addEventListener('DOMContentLoaded', () => {
-        const cursor = document.querySelector('.cursor-container');
-        if (cursor) cursor.remove();
-
-        const scrollContainer = document.querySelector('.scroll-container');
-        scrollContainer.style.transform = 'none';
-        scrollContainer.style.position = 'static';
-        scrollContainer.style.overflowY = 'auto';
-
-        window.removeEventListener('wheel', () => { });
-        if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(fakeScroll);
-      });
-    }
 
     // Function to handle continuous text display for mobile list
     function handleContinuousTextDisplay() {
