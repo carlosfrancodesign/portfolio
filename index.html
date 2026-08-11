@@ -1330,19 +1330,6 @@
       console.log("toggled");
     }
 
-    // Toggle dark/light mode on any click on the screen, except anchor links and except Home (return-to-top), but
-    // disable toggle until after initial overlay enter (hasEntered)
-    document.addEventListener('click', (event) => {
-      // Check if the clicked element is an anchor or is inside an anchor
-      const isAnchorClick = event.target.closest('a');
-      // Check if the clicked element is or is inside 'return-to-top' (home button)
-      const isHomeClick = event.target.closest('#return-to-top');
-      // Ignore click for dark mode until after overlay is gone
-      if (hasEntered && !isAnchorClick && !isHomeClick) {
-        toggleDarkMode(event);
-      }
-    });
-
     document.addEventListener('keydown', (event) => {
       if (hasEntered && event.key === " ") {
         toggleDarkMode(event);
