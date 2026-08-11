@@ -1332,15 +1332,11 @@
 
 function isInteractive(target) {if (!target) return false;const selector = [‘a’,‘button’,‘input’,‘textarea’,‘select’,‘label’,‘summary’,‘[role=“button”]’,‘[contenteditable=“true”]’,‘[data-no-toggle]’].join(’,’);return Boolean(target.closest && target.closest(selector));}
 
-function toggleDarkMode() {const isDark = document.body.classList.toggle(‘dark-mode’);try { localStorage.setItem(‘darkMode’, isDark ? ‘true’ : ‘false’); } catch (e) {}}
-
 if (isInteractive(e.target)) return;
 
 const active = document.activeElement;if (active && (active.tagName === ‘INPUT’ || active.tagName === ‘TEXTAREA’ || active.isContentEditable)) return;
 
 if (e.button && e.button !== 0) return;
-
-toggleDarkMode();});
 
     document.addEventListener('keydown', (event) => {
       if (hasEntered && event.key === " ") {
