@@ -1328,7 +1328,7 @@
       console.log("toggled");
     }
 
-    document.addEventListener('keydown', (event) => {
+    document.addEventListener('keydown', 'click', (event) => {
       if (hasEntered && event.key === " ") {
         toggleDarkMode(event);
       }
