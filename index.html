@@ -17,7 +17,14 @@
       --bg: #fefffc;
       --text: #1c201c;
       --accent: #4fcc53;
-      --width: 60vw;
+      /* Shared mobile hero + scroll panel width — adjust this to resize both */
+      --gutter: 10px;
+      --stack-gap: 6px;
+      /* Gallery/wordmark frame aspect (width / height) — golden ratio portrait */
+      --hero-aspect-w: 1.618;
+      --hero-aspect-h: 1;
+      /* Wordmark size inside the gallery frame (gallery stays full --width × aspect) */
+      --hero-svg-size: 72%;
 
       /* Dark mode colors */
       --bg-dark: #0a0f09;
@@ -35,20 +42,13 @@
     body,
     html {
       background: var(--bg);
-      height: 100%;
-      width: 100%;
+      height: 100vh;
+      width: 100vw;
       margin: 0;
       padding: 0;
       overflow: hidden;
       cursor: none;
     }
-
-    /*
-    body,
-    html,
-    .scroll-container {
-      outline: 1px dashed red;
-    }*/
 
     body {
       background-attachment: fixed;
@@ -109,7 +109,7 @@
       font-style: normal;
       text-decoration: none;
       text-transform: lowercase;
-    } 
+    }
 
     h2 {
       font-family: 'NeueHaasDisplay', sans-serif;
@@ -132,22 +132,42 @@
       opacity: 1;
     }
 
-    .bio p {
+    .stack p {
       margin: 0;
       padding: 0;
     }
 
-    .bio em {
-        font-family: 'FoundersGrotesk', sans-serif;
-        font-size: 0.8em;
-        color: var(--accent);
-        line-height: 0;
-        text-transform: uppercase;
-        text-decoration: none;
-        font-style: normal;
-      }
+    .stack em {
+      font-family: 'FoundersGrotesk', sans-serif;
+      font-size: 0.9em;
+      color: var(--accent);
+      line-height: 0;
+      text-transform: uppercase;
+      text-decoration: none;
+      font-style: normal;
+    }
 
-    .bio {
+    .stack {
+      box-sizing: border-box;
+      width: auto;
+      max-width: none;
+      font-family: 'NeueHaasDisplay', sans-serif;
+      font-weight: 400;
+      font-size: 9pt;
+      line-height: 1.3;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+      text-align: justify;
+      display: flex;
+      flex-direction: column;
+      gap: var(--stack-gap);
+      overflow-x: hidden;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+      pointer-events: auto;
       position: fixed;
       max-width: 30vh;
       top: 20px;
@@ -158,16 +178,41 @@
       text-transform: lowercase;
       font-size: 1em;
       line-height: 1.4;
-      text-align: justify;
+      text-align: left;
+      text-transform: none;
       opacity: 1;
       transition: opacity 0.6s ease, transform 0.6s ease;
     }
 
-    .bio.scrolled {
+    .stack.scrolled {
       opacity: 0 !important;
       pointer-events: none;
     }
 
+    .bio-item {
+      margin: 0;
+      line-height: 1.4;
+      display: block;
+      width: 100%;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      padding: 14px 12px;
+      border-radius: 4px;
+      border: var(--mobile-border);
+      background: color-mix(in srgb, var(--text) 4%, var(--bg));
+      color: var(--text);
+      text-align: inherit;
+      font: inherit;
+      font-size: 9pt;
+      text-transform: inherit;
+      text-decoration: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transform-origin: 50% 50%;
+      transform: translateZ(0) scale(1);
+      will-change: transform, opacity, filter;
+      backface-visibility: hidden;
+    }
 
     .toggle p {
       margin: 0;
@@ -229,8 +274,39 @@
       transition: opacity 0.5s ease;
     }
 
-    .hero svg .st0 {
+    .hero svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .hero svg path, polygon {
       fill: var(--text);
+    }
+
+    .hero-gallery {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      overflow: hidden;
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+      background: var(--bg);
+    }
+
+    .hero-gallery.is-active {
+      opacity: 1;
+      visibility: visible;
+      pointer-events: auto;
+    }
+
+    .hero-gallery img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
     }
 
     .hero.scrolled {
@@ -489,17 +565,31 @@
       pointer-events: none;
     }
 
+    .mobile-stack {
+      display: none;
+    }
+
+    /* styles.css */
+
     @media (max-width: 768px),
     (pointer: coarse) {
+      :root {
+        --width: calc(100vw - (var(--gutter) * 2));
+        --mobile-margin: 8px;
+        --mobile-radius: 10px;
+        --mobile-border: 0px solid color-mix(in srgb, var(--text) 18%, transparent);
+      }
 
       html,
       body {
         height: 100vh;
-        overflow: none;
+        max-height: 100vh;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
         cursor: auto;
-      }
-
-      body {
+        width: 100vw;
+        box-sizing: border-box;
         overflow-y: auto;
       }
 
@@ -516,58 +606,102 @@
         cursor: auto;
       }
 
-      /* experimenting */
+      /* Mobile navigation */
       .navbar {
         display: none !important;
       }
 
-      /* Wordmark/Logo */
+      .toggle {
+        display: none !important;
+      }
+
+      /* Wordmark / Logo + gallery */
+      /* Fixed mobile hero */
+
       .hero {
-        position: fixed;
-        z-index: 1;
-        width: 40.5vw;
+        position: fixed !important;
+        top: var(--mobile-margin) !important;
+        bottom: auto !important;
+        left: var(--mobile-margin) !important;
+        right: auto !important;
+        width: calc(100vw - (var(--mobile-margin) * 2)) !important;
+        max-width: calc(100vw - (var(--mobile-margin) * 2)) !important;
+        aspect-ratio: var(--hero-aspect-w) / var(--hero-aspect-h);
         height: auto;
-        padding: 0;
-        top: 30px;
-        left: 20px;
+        z-index: 3 !important;
+        padding: 0 !important;
+        margin: 0;
         transform: none;
+        opacity: 1 !important;
+        box-sizing: border-box;
+        background: var(--bg);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
       }
 
-      .scroll-container {
+      .hero svg {
+        width: var(--hero-svg-size);
+        max-width: var(--hero-svg-size);
+        height: auto;
+        flex-shrink: 0;
+      }
+
+      .hero-gallery {
+        border-radius: var(--mobile-radius);
+      }
+
+      /* Desktop-only content */
+      .scroll-container,
+      .bio, .stack {
         display: none !important;
       }
 
-      .bio {
-        display: none !important;
-      }
-
-      /* Mobile Bio Section */
-      .mobile-bio {
+      /* Mobile bio + portfolio stack */
+      /* Mobile fixed scroll container */
+      .mobile-stack {
         position: fixed;
-        top: 30px;
-        right: 20px;
-        max-width: 45vw;
+        top: calc(var(--mobile-margin) + ((100vw - (var(--mobile-margin) * 2)) * var(--hero-aspect-h) / var(--hero-aspect-w)) + var(--stack-gap));
+        right: var(--mobile-margin);
+        bottom: var(--mobile-margin);
+        left: var(--mobile-margin);
         z-index: 2;
-        max-height: 35vh;
+        margin: 0;
+        box-sizing: border-box;
+        width: auto;
+        max-width: none;
         font-family: 'NeueHaasDisplay', sans-serif;
         font-weight: 400;
-        text-transform: uppercase;
         font-size: 9pt;
-        line-height: 1.4;
+        line-height: 1.3;
+        letter-spacing: 0.02em;
+        text-transform: none;
         text-align: justify;
-        padding-right: 0;
-        /* Prevent padding for scrollbar */
-        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: var(--stack-gap);
+        overflow-x: hidden;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        pointer-events: auto;
       }
 
-      .mobile-bio p {
+      .mobile-stack::-webkit-scrollbar {
+        display: none;
+      }
+
+      .mobile-stack p {
         margin: 0;
         padding: 0;
       }
 
-      .mobile-bio em {
+      .mobile-stack em {
         font-family: 'FoundersGrotesk', sans-serif;
-        font-size: 1.1em;
+        font-size: 9pt;
         line-height: 0;
         color: var(--accent);
         text-transform: uppercase;
@@ -575,213 +709,66 @@
         font-style: normal;
       }
 
-      .mobile-bio a {
-        line-height: 1;
-        background: none;
-        border: none;
-        outline: none;
-        box-shadow: none;
-        color: var(--text);
-        text-transform: uppercase;
-        text-decoration: underline;
-        font-style: normal;
-      }
-
-      .mobile-bio a:hover {
-        line-height: 1;
-        color: var(--accent);
-        text-transform: uppercase;
-        text-decoration: underline;
-        font-style: normal;
-      }
-
-      .toggle {
-        display: none !important;
-      }
-
-      .mobile-list {
-        text-align: right;
-        position: fixed;
-        bottom: 30px;
-        right: 20px;
-        max-width: 45vw;
-        z-index: 2;
-        font-size: 9pt;
-        text-transform: uppercase;
-        padding-bottom: 0 !important;
-        margin-bottom: 0 !important;
-        max-height: 40vh;
-        overflow-y: auto;
-
-        /* Hide scrollbar */
-        scrollbar-width: none;
-        /* Firefox */
-        -ms-overflow-style: none;
-        /* Internet Explorer 10+ */
-      }
-
-      .mobile-list::-webkit-scrollbar {
-        display: none;
-        /* Chrome, Safari, Opera */
-      }
-
-      .mobile-list h3 {
-        font-family: 'FoundersGrotesk', sans-serif;
-        font-weight: 400;
-        line-height: 1;
-        color: var(--accent);
-        text-transform: uppercase;
-        text-decoration: none;
-        font-style: normal;
-      }
-
-      .mobile-list ul {
-        font-family: 'NeueHaasGrotesk', sans-serif;
-        font-weight: 400;
-        list-style: none;
-        padding: 0;
+      .mobile-item {
         margin: 0;
-      }
-
-      .mobile-list li {
-        margin-bottom: 12px;
         line-height: 1.4;
         display: block;
         width: 100%;
-        clear: both;
+        flex-shrink: 0;
+        box-sizing: border-box;
+        padding: 16px 12px;
+        border-radius: var(--mobile-radius);
+        border: var(--mobile-border);
+        background: color-mix(in srgb, var(--text) 4%, var(--bg));
+        color: var(--text);
+        text-align: inherit;
+        font: inherit;
+        font-size: 9pt;
+        text-transform: inherit;
+        text-decoration: none;
+        appearance: none;
+        -webkit-appearance: none;
+        transform-origin: 50% 50%;
+        transform: translateZ(0) scale(1);
+        will-change: transform, opacity, filter;
+        backface-visibility: hidden;
       }
 
-      .mobile-list li:last-child {
-        margin-bottom: 0;
+      .mobile-item-toggle {
+        appearance: none;
+        -webkit-appearance: none;
+        border: var(--mobile-border);
+        background: color-mix(in srgb, var(--text) 4%, var(--bg));
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
       }
-
-      .mobile-list li:hover {
-        color: var(--accent);
-      }
-
-      /*
-      .navbar li:nth-child(1) a::before {
-        content: '\261E\FE0E';
-      }
-
-      .navbar li:nth-child(2) a::before {
-        content: '\270C\FE0E';
-      }
-
-      .navbar li:nth-child(3) a::before {
-        content: '\26D3\FE0E';
-      }
-
-      .navbar li:nth-child(4) a::before {
-        content: '\2604\FE0E';
-      }
-      */
     }
 
-    /* Extra small screens: stack hero, bio, and list vertically, size down text */
-    @media (max-width: 480px) {
+    .mobile-item:hover,
+    .mobile-item-toggle:hover,
+    a.mobile-item:hover {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    }
 
-      html,
-      body {
-        height: auto;
-        min-height: 100vh;
-        margin: 0;
-        padding: 0;
-      }
+    .mobile-item-toggle {
+      cursor: pointer;
+    }
 
-      body {
-        min-height: 100vh;
-        width: 100vw;
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+    a.mobile-item {
+      text-decoration: none;
+    }
 
-      .hero,
-      .mobile-bio,
-      .mobile-list {
-        position: static !important;
-        width: 100vw !important;
-        max-width: 100vw !important;
-        left: 0 !important;
-        right: 0 !important;
-        top: 0 !important;
-        bottom: 0 !important;
-        z-index: auto !important;
-        box-sizing: border-box;
-        padding: 0px 20px;
-        margin: 0;
-      }
+    .mobile-item-work {
+      cursor: pointer;
+      text-align: left;
+      font-family: 'NeueHaasGrotesk', sans-serif;
+    }
 
-      .hero {
-        margin-top: 20px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        /* Remove any vertical offset to ensure hero starts at the top */
-      }
-
-      .mobile-bio {
-        margin-top: 20px;
-        max-height: none;
-        line-height: 1.5;
-        text-align: justify;
-        width: 100vw !important;
-      }
-
-      .mobile-bio em {
-        font-size: 1em;
-      }
-
-      .mobile-list {
-        max-height: none;
-        text-align: left;
-        width: 100vw !important;
-      }
-
-      .mobile-bio p,
-      .mobile-list h3,
-      .mobile-list li {
-        font-size: clamp(10pt, 3.5vw, 16pt);
-      }
-
-      .mobile-list h3 {
-        display: auto;
-      }
-
-      .mobile-list li {
-        margin-bottom: 10px;
-      }
-
-      /* Continuous text display for mobile list */
-      .mobile-list.continuous-text {
-        display: block;
-        position: fixed !important;
-        bottom: 20px !important;
-        top: auto !important;
-        z-index: 9999 !important;
-      }
-
-      .mobile-list.continuous-text ul {
-        display: block;
-        white-space: normal;
-        line-height: 1.4;
-      }
-
-      .mobile-list.continuous-text li {
-        display: inline;
-        margin-bottom: 0;
-        font-size: clamp(12pt, 3.5vw, 16pt);
-      }
-
-      .mobile-list.continuous-text li:not(:last-child)::after {
-        content: " ✦ ";
-        display: inline;
-      }
-      .mobile-list.continuous-text li:not(:last-child):hover::after {
-        color: var(--text);
-      }
-
+    .mobile-item-work.is-active {
+      color: var(--accent);
+      border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     }
   </style>
 
@@ -792,88 +779,89 @@
   <div id="safari-overlay" data-subtitle="enter">
   </div>
   <div class="hero">
-    <?xml version="1.0" encoding="utf-8"?>
-    <!-- Generator: Adobe Illustrator 28.2.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-    <svg version="1.1" id="a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
-      y="0px" viewBox="0 0 1276.6 462.51" style="enable-background:new 0 0 1276.6 462.51;" xml:space="preserve">
-      <path class="st0" d="M105.43,0c63,0,96.62,40.14,100.53,91.39l-53.21,1.96c-3.26-22.85-15.67-44.06-47.65-44.06
-	s-47.99,22.52-47.99,57.44s17.64,57.44,47.99,57.44c31.99,0,44.39-21.21,47.66-44.06l53.21,2.28
-	c-3.92,51.26-37.54,91.06-100.53,91.06S0,170.04,0,106.72S45.37,0,105.43,0z" />
-      <path class="st0" d="M294.37,128.26h48.32l-23.5-60.7h-1.31L294.37,128.26z M351.17,3.92l81.93,205.61h-59.08l-15.35-39.82h-80.29
-	l-15.34,39.82h-55.83L289.15,3.92H351.17L351.17,3.92z" />
-      <path class="st0" d="M548.45,98.58c23.5,0,35.25-5.87,35.25-24.81c0-16.64-11.75-25.46-35.25-25.46h-39.5v50.26L548.45,98.58
-	L548.45,98.58z M584.7,209.55c-4.24-5.55-6.86-18.28-8.49-39.49c-1.63-23.5-11.75-28.72-30.36-28.72h-36.88v68.21h-55.79V3.92
-	h105.06c53.21,0,79.65,25.13,79.65,65.27c0,30.03-18.61,49.61-43.74,52.87c21.22,4.24,34.88,16.31,37.16,40.14
-	c2.94,30.68,2.66,39.82,9.51,47.32h-56.13L584.7,209.55z" />
-      <polygon class="st0" points="725.85,3.92 725.85,163.84 827.69,163.84 827.69,209.53 670.36,209.53 670.36,3.92 " />
-      <path class="st0" d="M944.55,50.21c-30.36,0-49.6,22.85-49.6,57.77s19.26,57.77,49.6,57.77s49.6-22.85,49.6-57.77
-	S974.9,50.21,944.55,50.21z M944.55,214.7c-59.73,0-106.74-43.41-106.74-106.72s47-106.72,106.74-106.72s106.74,43.41,106.74,106.72
-	S1004.28,214.7,944.55,214.7L944.55,214.7z" />
-      <path class="st0" d="M1131.31,135.12c1.96,25.79,21.87,34.6,44.72,34.6c19.26,0,31.66-6.85,31.66-18.28
-	c0-12.08-12.08-14.03-27.75-16.98l-37.54-6.53c-33.62-6.2-57.12-25.13-57.12-61.03c0-41.77,32.64-66.9,83.89-66.9
-	c56.8,0,87.48,27.74,88.46,73.43l-50.93,0.98c-1.63-21.22-16.98-31-38.19-31c-18.28,0-28.72,7.18-28.72,18.6
-	c0,9.47,7.84,13.05,20.57,15.34l38.84,6.86c43.09,7.51,62.67,30.03,62.67,63.64c0,43.74-37.86,65.6-85.85,65.6
-	c-55.82,0-95.64-27.09-95.64-76.7L1131.31,135.12L1131.31,135.12z" />
-      <polygon class="st0" points="10.17,458.59 10.17,252.98 165.55,252.98 165.55,298.67 65.68,298.67 65.68,338.16 140.74,338.16 
-	140.74,383.2 65.67,383.2 65.67,458.59 " />
-      <path class="st0" d="M283.04,347.63c23.5,0,35.25-5.88,35.25-24.8c0-16.64-11.75-25.46-35.25-25.46h-39.49v50.26L283.04,347.63
-	L283.04,347.63z M319.27,458.59c-4.24-5.55-6.85-18.28-8.48-39.49c-1.63-23.5-11.75-28.72-30.36-28.72h-36.88v68.21h-54.51V252.98
-	h103.8c53.21,0,79.64,25.13,79.64,65.27c0,30.03-18.6,49.59-43.74,52.87c21.22,4.24,33.62,16.31,35.9,40.14
-	c2.94,30.68,3.92,39.82,10.77,47.32h-56.15L319.27,458.59z" />
-      <path class="st0" d="M476.85,377.33h48.31l-23.5-60.7h-1.3l-23.5,60.7H476.85z M533.65,252.98l81.93,205.61H556.5l-15.34-39.82
-	h-80.29l-15.35,39.82H389.7l81.93-205.61H533.65L533.65,252.98z" />
-      <polygon class="st0" points="768.48,366.88 768.48,252.98 819.41,252.98 819.41,458.59 775.01,458.59 686.23,336.86 686.23,458.59 
-	635.3,458.59 635.3,252.98 688.18,252.98 " />
-      <path class="st0" d="M946.99,249.06c63,0,96.62,40.14,100.53,91.39l-53.21,1.96c-3.26-22.85-15.67-44.06-47.66-44.06
-	s-47.98,22.52-47.98,57.44s17.64,57.44,47.98,57.44c31.99,0,44.39-21.21,47.66-44.06l53.21,2.28
-	c-3.91,51.26-37.54,91.06-100.53,91.06S841.56,419.1,841.56,355.78S886.93,249.06,946.99,249.06z" />
-      <path class="st0" d="M1169.86,298.02c-30.36,0-49.6,22.84-49.6,57.77s19.26,57.77,49.6,57.77s49.6-22.85,49.6-57.77
-	S1200.21,298.02,1169.86,298.02z M1169.86,462.51c-59.73,0-106.74-43.41-106.74-106.73s47-106.72,106.74-106.72
-	s106.74,43.41,106.74,106.72S1229.6,462.51,1169.86,462.51z" />
-    </svg>
-  </div>
-  <ul class="navbar">
-    <li>
-      <a href="mailto:design@carlosfran.co" target="_blank">Contact
-      </a>
-    </li>
+    <?xml version="1.0" encoding="UTF-8"?>
     <!--
-    <li>
-      <a href="https://www.instagram.com/co.ldfoot/" target="_blank">
-        <h1>Instagram</h1>
-      </a>
-    </li>
-    <li>
-      <a href="https://www.linkedin.com/in/carlosfran-co" target="_blank">
-        <h1>Linkedin</h1>
-      </a>
-    </li>
-    <li>
-      <a href="https://app.box.com/file/880021401030?s=3mf13qqgyn1u59m1nxm24yelr6uumgwb" target="_blank">
-        <h1>Resume</h1>
-      </a>
-    </li>
+    <svg id="a" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 1276.6 462.5">
+      <path d="M106.4,5c63,0,96.6,40.1,100.5,91.4l-53.2,2c-3.3-22.8-15.7-44.1-47.7-44.1s-48,22.5-48,57.4,17.6,57.4,48,57.4,44.4-21.2,47.7-44.1l53.2,2.3c-3.9,51.3-37.5,91.1-100.5,91.1S1,175,1,111.7,46.4,5,106.4,5Z"/>
+      <path d="M295.4,133.3h48.3l-23.5-60.7h-1.3l-23.5,60.7ZM352.2,8.9l81.9,205.6h-59.1l-15.4-39.8h-80.3l-15.3,39.8h-55.8L290.1,8.9h62Z"/>
+      <path d="M549.5,103.6c23.5,0,35.2-5.9,35.2-24.8s-11.8-25.5-35.2-25.5h-39.5v50.3h39.5ZM585.7,214.6c-4.2-5.6-6.9-18.3-8.5-39.5-1.6-23.5-11.8-28.7-30.4-28.7h-36.9v68.2h-55.8V8.9h105.1c53.2,0,79.7,25.1,79.7,65.3s-18.6,49.6-43.7,52.9c21.2,4.2,34.9,16.3,37.2,40.1,2.9,30.7,2.7,39.8,9.5,47.3h-56.1,0Z"/>
+      <polygon points="726.8 8.9 726.8 168.8 828.7 168.8 828.7 214.5 671.4 214.5 671.4 8.9 726.8 8.9"/>
+      <path d="M943.5,55.2c-30.4,0-49.6,22.8-49.6,57.8s19.3,57.8,49.6,57.8,49.6-22.9,49.6-57.8-19.2-57.8-49.6-57.8ZM943.5,219.7c-59.7,0-106.7-43.4-106.7-106.7S883.8,6.3,943.5,6.3s106.7,43.4,106.7,106.7-47,106.7-106.7,106.7h0Z"/>
+      <path d="M1129.3,140.1c2,25.8,21.9,34.6,44.7,34.6s31.7-6.9,31.7-18.3-12.1-14-27.8-17l-37.5-6.5c-33.6-6.2-57.1-25.1-57.1-61s32.6-66.9,83.9-66.9,87.5,27.7,88.5,73.4l-50.9,1c-1.6-21.2-17-31-38.2-31s-28.7,7.2-28.7,18.6,7.8,13.1,20.6,15.3l38.8,6.9c43.1,7.5,62.7,30,62.7,63.6s-37.9,65.6-85.8,65.6-95.6-27.1-95.6-76.7l50.9-1.6h0Z"/>
+      <polygon points="11.2 453.6 11.2 248 166.6 248 166.6 293.7 66.7 293.7 66.7 333.2 141.7 333.2 141.7 378.2 66.7 378.2 66.7 453.6 11.2 453.6"/>
+      <path d="M284,342.6c23.5,0,35.2-5.9,35.2-24.8s-11.8-25.5-35.2-25.5h-39.5v50.3h39.5ZM320.3,453.6c-4.2-5.5-6.9-18.3-8.5-39.5-1.6-23.5-11.8-28.7-30.4-28.7h-36.9v68.2h-54.5v-205.6h103.8c53.2,0,79.6,25.1,79.6,65.3s-18.6,49.6-43.7,52.9c21.2,4.2,33.6,16.3,35.9,40.1,2.9,30.7,3.9,39.8,10.8,47.3h-56.1,0Z"/>
+      <path d="M477.9,372.3h48.3l-23.5-60.7h-1.3l-23.5,60.7h0ZM534.7,248l81.9,205.6h-59.1l-15.3-39.8h-80.3l-15.4,39.8h-55.8l81.9-205.6h62Z"/>
+      <polygon points="769.5 361.9 769.5 248 820.4 248 820.4 453.6 776 453.6 687.2 331.9 687.2 453.6 636.3 453.6 636.3 248 689.2 248 769.5 361.9"/>
+      <path d="M946,244.1c63,0,96.6,40.1,100.5,91.4l-53.2,2c-3.3-22.9-15.7-44.1-47.7-44.1s-48,22.5-48,57.4,17.6,57.4,48,57.4,44.4-21.2,47.7-44.1l53.2,2.3c-3.9,51.3-37.5,91.1-100.5,91.1s-105.4-43.4-105.4-106.7,45.4-106.7,105.4-106.7Z"/>
+      <path d="M1168.9,293c-30.4,0-49.6,22.8-49.6,57.8s19.3,57.8,49.6,57.8,49.6-22.9,49.6-57.8-19.2-57.8-49.6-57.8ZM1168.9,457.5c-59.7,0-106.7-43.4-106.7-106.7s47-106.7,106.7-106.7,106.7,43.4,106.7,106.7-47,106.7-106.7,106.7Z"/>
+    </svg>
     -->
-  </ul>
-
-  <div class="toggle">
-    <p>space to toggle</p>
+<svg version="1.0" id="a" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 1276.6 462.5" style="enable-background:new 0 0 1276.6 462.5;" xml:space="preserve">
+<g>
+	<path d="M106.4,5c63,0,96.6,40.1,100.5,91.4l-53.2,2c-3.3-22.8-15.7-44.1-47.7-44.1s-48,22.5-48,57.4s17.6,57.4,48,57.4
+		c32,0,44.4-21.2,47.7-44.1l53.2,2.3c-3.9,51.3-37.5,91.1-100.5,91.1S1,175,1,111.7S46.4,5,106.4,5z"/>
+	<path d="M264,214.5h-55.8L290.1,8.9h62l0,0l81.9,205.6H375"/>
+	<path d="M549.5,103.6c23.5,0,35.2-5.9,35.2-24.8c0-16.6-11.8-25.5-35.2-25.5H510v50.3L549.5,103.6L549.5,103.6z M585.7,214.6
+		c-4.2-5.6-6.9-18.3-8.5-39.5c-1.6-23.5-11.8-28.7-30.4-28.7H510v68.2h-55.8V8.9h105.1c53.2,0,79.7,25.1,79.7,65.3
+		c0,30-18.6,49.6-43.7,52.9c21.2,4.2,34.9,16.3,37.2,40.1c2.9,30.7,2.7,39.8,9.5,47.3L585.7,214.6L585.7,214.6z"/>
+	<polygon points="726.8,8.9 726.8,168.8 828.7,168.8 828.7,214.5 671.4,214.5 671.4,8.9 	"/>
+	<path d="M943.5,219.7c-59.7,0-106.7-43.4-106.7-106.7S883.8,6.3,943.5,6.3s106.7,43.4,106.7,106.7S1003.3,219.7,943.5,219.7
+		L943.5,219.7z"/>
+	<path d="M1129.3,140.1c2,25.8,21.9,34.6,44.7,34.6c19.3,0,31.7-6.9,31.7-18.3c0-12.1-12.1-14-27.8-17l-37.5-6.5
+		c-33.6-6.2-57.1-25.1-57.1-61c0-41.8,32.6-66.9,83.9-66.9c56.8,0,87.5,27.7,88.5,73.4l-50.9,1c-1.6-21.2-17-31-38.2-31
+		c-18.3,0-28.7,7.2-28.7,18.6c0,9.5,7.8,13.1,20.6,15.3l38.8,6.9c43.1,7.5,62.7,30,62.7,63.6c0,43.7-37.9,65.6-85.8,65.6
+		c-55.8,0-95.6-27.1-95.6-76.7L1129.3,140.1L1129.3,140.1z"/>
+	<polygon points="11.2,453.6 11.2,248 166.6,248 166.6,293.7 66.7,293.7 66.7,333.2 141.7,333.2 141.7,378.2 66.7,378.2 66.7,453.6 
+			"/>
+	<path d="M284,342.6c23.5,0,35.2-5.9,35.2-24.8c0-16.6-11.8-25.5-35.2-25.5h-39.5v50.3L284,342.6L284,342.6z M320.3,453.6
+		c-4.2-5.5-6.9-18.3-8.5-39.5c-1.6-23.5-11.8-28.7-30.4-28.7h-36.9v68.2H190V248h103.8c53.2,0,79.6,25.1,79.6,65.3
+		c0,30-18.6,49.6-43.7,52.9c21.2,4.2,33.6,16.3,35.9,40.1c2.9,30.7,3.9,39.8,10.8,47.3L320.3,453.6L320.3,453.6z"/>
+	<path d="M446.5,453.6h-55.8L472.6,248h62l0,0l81.9,205.6h-59.1"/>
+	<polygon points="769.5,361.9 769.5,248 820.4,248 820.4,453.6 776,453.6 687.2,331.9 687.2,453.6 636.3,453.6 636.3,248 689.2,248 
+			"/>
+	<path d="M946,244.1c63,0,96.6,40.1,100.5,91.4l-53.2,2c-3.3-22.9-15.7-44.1-47.7-44.1s-48,22.5-48,57.4s17.6,57.4,48,57.4
+		c32,0,44.4-21.2,47.7-44.1l53.2,2.3c-3.9,51.3-37.5,91.1-100.5,91.1s-105.4-43.4-105.4-106.7S885.9,244.1,946,244.1z"/>
+	<path d="M1168.9,457.5c-59.7,0-106.7-43.4-106.7-106.7s47-106.7,106.7-106.7s106.7,43.4,106.7,106.7S1228.6,457.5,1168.9,457.5z"/>
+</g>
+</svg>
+    <div class="hero-gallery" id="hero-gallery" aria-hidden="true">
+      <img id="hero-gallery-img" alt="">
+    </div>
   </div>
 
-  <div class="bio">
-    <p>is a multidisciplinary artist and designer based in texas <em>✦</em> he studied arts and technology at <em>the university
-      of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
-      nature
-      and science</em> <em>✦</em> he has been practicing freelance graphic design since what is now known as frutiger aero
-    </p>
+  <div class="stack" id="stack">
+    <div class="bio-item">
+      <p>is a multidisciplinary artist and designer based in Texas</p>
+    </div>
+    <div class="bio-item">
+      <p>studied arts and technology at <em>the university
+          of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
+          nature and science</em></p>
+    </div>
+    <div class="bio-item">
+      <p>has been practicing freelance graphic design since what is now known as frutiger aero</p>
+    </div>
+    <div class="bio-item ">space to toggle</div>
+    <button type="button" class="bio-item" href="mailto:design@carlosfran.co" target="_blank">contact</a>
   </div>
 
   <div class="scroll-container">
     <div class="content-grid">
+      <div class="item" data-subtitle="Posters 2026">
+        <a href="https://www.dropbox.com/scl/fi/nfg594fj4mz8cf8600e0m/TES_Ads_Deliverables.pdf?rlkey=uq57sv2eee907ti2rr5wk9b5j&st=u4tx3ndc&dl=0"
+          target="_blank">
+          <img src="./assets/images/WC_26.jpg">
+          <img src="./assets/images/WC_26_2.jpg">
+          <img src="./assets/images/Milwaukee_Miz.jpg">
+        </a>
+      </div>
       <div class="item" data-subtitle="Telecom Electric Supply">
         <a href="https://www.dropbox.com/scl/fi/nfg594fj4mz8cf8600e0m/TES_Ads_Deliverables.pdf?rlkey=uq57sv2eee907ti2rr5wk9b5j&st=u4tx3ndc&dl=0"
           target="_blank">
           <img src="./assets/images/TES_Ads_Mockup_02.jpg">
+          <img src="./assets/images/TES-Flag-Mockup.png">
+          <img src="./assets/images/TES_40_Logo.png">
         </a>
       </div>
       <div class="item" data-subtitle="Perot Museum of Nature and Science">
@@ -882,7 +870,8 @@
         </a>
       </div>
       <div class="item" data-subtitle="Re-imagining Whataburger">
-        <a href="https://www.dropbox.com/scl/fi/omcxjcnyrsjzjgl2ffvwi/senior-capstone.reimagining-whataburger-2020.pdf?rlkey=761hkykguz5r0d17otklwuary&st=k9999xno&dl=0" target="_blank">
+        <a href="https://www.dropbox.com/scl/fi/omcxjcnyrsjzjgl2ffvwi/senior-capstone.reimagining-whataburger-2020.pdf?rlkey=761hkykguz5r0d17otklwuary&st=k9999xno&dl=0"
+          target="_blank">
           <img src="https://carlosfrancoweb.files.wordpress.com/2021/03/wb-hero-02.jpg">
         </a>
       </div>
@@ -915,23 +904,21 @@
     <p class="scroll">scroll</p>
   </div>
 
-  <!-- Mobile Bio Section -->
-  <div class="mobile-bio">
-    <p>is a multidisciplinary artist and designer based in texas. he studied arts and technology at <em>the university
-        of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
-        nature and science</em></p>
-	  <p>he has been practicing freelance graphic design since what is now known as frutiger aero</p>
-      <p>tap to toggle</p>
-      <p><a href="mailto:design@carlosfran.co" target="_blank">Contact
-      </a></p>
-  </div>
-
-  <!-- Mobile List View -->
-  <div class="mobile-list">
-    <h3>Work</h3>
-    <ul id="mobile-list-items">
-      <!-- Populated by JavaScript -->
-    </ul>
+  <!-- Mobile bio + portfolio stack -->
+  <div class="mobile-stack" id="mobile-stack">
+    <div class="mobile-item">
+      <p><em>Carlos Franco</em> is a multidisciplinary artist and designer based in Texas</p>
+    </div>
+    <div class="mobile-item">
+      <p>He studied arts and technology at <em>the university
+          of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
+          nature and science</em></p>
+    </div>
+    <div class="mobile-item">
+      <p>He has been practicing freelance graphic design since what is now known as Frutiger Aero</p>
+    </div>
+    <button type="button" class="mobile-item mobile-item-toggle" id="mobile-tap-toggle">Tap to toggle</button>
+    <a class="mobile-item" href="mailto:design@carlosfran.co" target="_blank">Contact</a>
   </div>
 
   <script>
@@ -961,147 +948,238 @@
         cursorCircle.style.transform = 'scale(0.25)';
       });
 
-      // Populate mobile list with content-grid items
-      const mobileListItems = document.getElementById('mobile-list-items');
+      // Populate mobile stack with content-grid items
+
+      const mobileStack = document.getElementById('mobile-stack');
+
+      const heroGallery = document.getElementById('hero-gallery');
+
+      const heroGalleryImg = document.getElementById('hero-gallery-img');
+
       const contentItems = document.querySelectorAll('.content-grid .item');
 
-      if (mobileListItems && contentItems.length > 0) {
+      let activeWorkItem = null;
+
+      let activeImageIndex = 0;
+
+      let galleryTimeout = null;
+
+      const galleryTimeoutMs = 10000;
+
+      function showHeroGallery(imgSrc, title, workItem) {
+
+        if (!heroGallery || !heroGalleryImg) return;
+
+        if (galleryTimeout) {
+
+          clearTimeout(galleryTimeout);
+
+          galleryTimeout = null;
+
+        }
+
+        heroGalleryImg.src = imgSrc;
+
+        heroGalleryImg.alt = title || '';
+
+        heroGallery.classList.add('is-active');
+
+        heroGallery.setAttribute('aria-hidden', 'false');
+
+        if (activeWorkItem && activeWorkItem !== workItem) {
+
+          activeWorkItem.classList.remove('is-active');
+
+        }
+
+        if (workItem) {
+
+          workItem.classList.add('is-active');
+
+          activeWorkItem = workItem;
+
+        }
+
+        galleryTimeout = setTimeout(() => {
+
+          hideHeroGallery();
+
+        }, galleryTimeoutMs);
+
+      }
+
+      function hideHeroGallery() {
+
+        if (!heroGallery || !heroGalleryImg) return;
+
+        if (galleryTimeout) {
+
+          clearTimeout(galleryTimeout);
+
+          galleryTimeout = null;
+
+        }
+
+        heroGallery.classList.remove('is-active');
+
+        heroGallery.setAttribute('aria-hidden', 'true');
+
+        if (activeWorkItem) {
+
+          activeWorkItem.classList.remove('is-active');
+
+          activeWorkItem = null;
+
+        }
+
+        activeImageIndex = 0;
+
+      }
+
+      if (mobileStack && contentItems.length > 0) {
+
         contentItems.forEach(item => {
+
           const subtitle = item.getAttribute('data-subtitle');
-          if (subtitle) {
-            const listItem = document.createElement('li');
-            listItem.textContent = subtitle;
 
-            // Add click handler to navigate to the original link if it exists
-            const link = item.querySelector('a');
-            if (link) {
-              listItem.style.cursor = 'pointer';
-              listItem.addEventListener('click', () => {
-                // Only navigate to href on desktop, not mobile
-                if (!isMobile) {
-                  window.open(link.href, '_blank');
-                }
-              });
-            }
+          if (!subtitle) return;
 
-            // Add hover functionality to show image preview
-            const img = item.querySelector('img');
-            if (img) {
-              listItem.addEventListener('mouseenter', () => {
-                showImagePreview(img.src, subtitle);
-              });
+          const listItem = document.createElement('div');
 
-              listItem.addEventListener('mouseleave', () => {
-                hideImagePreview();
-              });
-            }
+          listItem.className = 'mobile-item mobile-item-work';
 
-            mobileListItems.appendChild(listItem);
+          listItem.textContent = subtitle;
+
+          listItem.setAttribute('role', 'button');
+
+          listItem.tabIndex = 0;
+
+          const link = item.querySelector('a');
+
+          const images = Array.from(item.querySelectorAll('img'));
+
+          if (images.length > 0) {
+
+            const imageSources = images
+
+              .map(img => img.currentSrc || img.src)
+
+              .filter(Boolean);
+
+            listItem.dataset.imgSrc = imageSources[0];
+
+            listItem.dataset.subtitle = subtitle;
+
+            const activateItem = () => {
+
+              if (activeWorkItem !== listItem) {
+
+                activeImageIndex = 0;
+
+                showHeroGallery(
+
+                  imageSources[activeImageIndex],
+
+                  subtitle,
+
+                  listItem
+
+                );
+
+                return;
+
+              }
+
+              if (!heroGallery?.classList.contains('is-active')) {
+
+                activeImageIndex = 0;
+
+                showHeroGallery(
+
+                  imageSources[activeImageIndex],
+
+                  subtitle,
+
+                  listItem
+
+                );
+
+                return;
+
+              }
+
+              if (imageSources.length > 1) {
+
+                activeImageIndex =
+
+                  (activeImageIndex + 1) % imageSources.length;
+
+                showHeroGallery(
+
+                  imageSources[activeImageIndex],
+
+                  subtitle,
+
+                  listItem
+
+                );
+
+                return;
+
+              }
+
+              hideHeroGallery();
+
+            };
+
+            listItem.addEventListener('click', activateItem);
+
+            listItem.addEventListener('keydown', event => {
+
+              if (event.key === 'Enter' || event.key === ' ') {
+
+                event.preventDefault();
+
+                activateItem();
+
+              }
+
+            });
+
+          } else if (link && !isMobile) {
+
+            const activateItem = () => {
+
+              window.open(link.href, '_blank');
+
+            };
+
+            listItem.addEventListener('click', activateItem);
+
+            listItem.addEventListener('keydown', event => {
+
+              if (event.key === 'Enter' || event.key === ' ') {
+
+                event.preventDefault();
+
+                activateItem();
+
+              }
+
+            });
+
           }
-        });
-      }
 
-      // Remove all timeouts and delays for image preview
-      let previewTimeout;
+          mobileStack.appendChild(listItem);
 
-      function showImagePreview(imgSrc, title) {
-        // Clear any existing timeout and hide current preview
-        if (previewTimeout) {
-          clearTimeout(previewTimeout);
-        }
-        hideImagePreview();
-
-        // Create preview container
-        const previewContainer = document.createElement('div');
-        previewContainer.id = 'mobile-image-preview';
-
-        // Compute preview size with 40px margin safety on all sides
-        const margin = 40;
-        const viewportWidth = window.innerWidth;
-        const viewportHeight = window.innerHeight;
-        const desiredWidth = viewportWidth * 0.7;  // 70vw
-        const desiredHeight = viewportWidth * 0.5; // 50vw
-        const finalWidth = Math.min(desiredWidth, Math.max(0, viewportWidth - margin * 2));
-        const finalHeight = Math.min(desiredHeight, Math.max(0, viewportHeight - margin * 2));
-
-        // Only apply random positioning for devices 480px or smaller
-        if (viewportWidth <= 480) {
-          // Random position clamped to keep the full preview within a 40px margin
-          const rangeX = Math.max(0, viewportWidth - margin * 2 - finalWidth);
-          const rangeY = Math.max(0, viewportHeight - margin * 2 - finalHeight);
-          const randomX = margin + (rangeX > 0 ? Math.random() * rangeX : 0);
-          const randomY = margin + (rangeY > 0 ? Math.random() * rangeY : 0);
-
-          previewContainer.style.cssText = `
-            position: fixed;
-            top: ${randomY}px;
-            left: ${randomX}px;
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-          `;
-        } else {
-          // Center positioning for larger devices
-          previewContainer.style.cssText = `
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 9999;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-          `;
-        }
-
-        // Create image element
-        const previewImg = document.createElement('img');
-        previewImg.src = imgSrc;
-        previewImg.style.cssText = `
-          width: ${finalWidth}px;
-          height: ${finalHeight}px;
-          object-fit: cover;
-          max-width: calc(100vw - ${margin * 2}px);
-          max-height: calc(100vh - ${margin * 2}px);
-        `;
-
-        // Append elements
-        previewContainer.appendChild(previewImg);
-        document.body.appendChild(previewContainer);
-
-        // Fade in
-        setTimeout(() => {
-          previewContainer.style.opacity = '1';
-        }, 10);
-
-        // Auto-hide after 5 seconds (longer preview on mobile/desktop)
-        previewTimeout = setTimeout(() => {
-          hideImagePreview();
-        }, 5000);
-      }
-
-      function hideImagePreview() {
-        const existingPreview = document.getElementById('mobile-image-preview');
-        if (existingPreview) {
-          existingPreview.style.opacity = '0';
-          setTimeout(() => {
-            if (existingPreview.parentNode) {
-              existingPreview.remove();
-            }
-          }, 300);
-        }
-      }
-
-      // Attach event listeners to the mobile-list container to track hover state
-      const mobileList = document.querySelector('.mobile-list');
-      if (mobileList) {
-        mobileList.addEventListener('mouseleave', () => {
-          hideImagePreview();
         });
 
-        mobileList.addEventListener('mouseenter', () => {
-          // No-op, but kept for symmetry
-        });
       }
+
+      // Tap the gallery image to dismiss
+      heroGallery?.addEventListener('click', () => {
+        hideHeroGallery();
+      });
 
       // Simple Safari detection
       const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
@@ -1138,11 +1216,26 @@
       }
 
       window.addEventListener('wheel', (e) => {
+        if (isMobileLayout()) {
+          const stack = document.getElementById('mobile-stack');
+          if (!stack) return;
+
+          // Keep native scrolling when already over the stack;
+          // otherwise drive the stack from anywhere on the page (e.g. over the hero).
+          if (!stack.contains(e.target)) {
+            e.preventDefault();
+            stack.scrollTop += e.deltaY;
+          }
+          return;
+        }
+
         e.preventDefault();
         velocity += e.deltaY * sensitivity;
       }, { passive: false });
 
       function fakeScroll() {
+        if (isMobileLayout()) return;
+
         const relativeVelocity = velocity * (1 / (1 + Math.abs(velocity) * relativity));
         scrollY += relativeVelocity;
 
@@ -1307,32 +1400,25 @@
     // Disable fake scroll and cursor behavior flag for mobile/touch;
     // CSS handles hiding the custom cursor and enabling native scroll.
     const isMobile = /Mobi|Android|iPhone|iPad|iPod|Touch/.test(navigator.userAgent) || window.innerWidth < 769;
-
-    // Function to handle continuous text display for mobile list
-    function handleContinuousTextDisplay() {
-      const mobileList = document.querySelector('.mobile-list');
-      if (mobileList && window.innerWidth <= 480) {
-        mobileList.classList.add('continuous-text');
-      } else if (mobileList) {
-        mobileList.classList.remove('continuous-text');
-      }
+    const mobileLayoutQuery = window.matchMedia('(max-width: 768px), (pointer: coarse)');
+    function isMobileLayout() {
+      return mobileLayoutQuery.matches;
     }
-
-    // Apply on page load
-    window.addEventListener('DOMContentLoaded', handleContinuousTextDisplay);
-
-    // Apply on window resize
-    window.addEventListener('resize', handleContinuousTextDisplay);
 
     function toggleDarkMode(Event) {
       document.body.classList.toggle('dark-mode');
       console.log("toggled");
     }
 
-    document.addEventListener('keydown', 'click', (event) => {
+    document.addEventListener('keydown', (event) => {
       if (hasEntered && event.key === " ") {
         toggleDarkMode(event);
       }
+    });
+
+    document.getElementById('mobile-tap-toggle')?.addEventListener('click', (event) => {
+      event.preventDefault();
+      toggleDarkMode(event);
     });
 
   </script>
