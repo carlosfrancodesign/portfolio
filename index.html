@@ -25,6 +25,7 @@
       --bg-dark: #0a0f09;
       --text-dark: #e6ebd7;
       --accent-dark: #aeb0f3;
+      --font-size-mobile: 11pt;
     }
 
     body.dark-mode {
@@ -645,7 +646,6 @@
         max-width: none;
         font-family: 'NeueHaasDisplay', sans-serif;
         font-weight: 400;
-        font-size: 9pt;
         line-height: 1.4;
         letter-spacing: 0.02em;
         text-transform: none;
@@ -678,7 +678,7 @@
  
       .mobile-stack em {
         font-family: 'FoundersGrotesk', sans-serif;
-        font-size: 9pt;
+        font-size: 10pt;
         line-height: 0;
         color: var(--accent);
         text-transform: uppercase;
@@ -700,7 +700,7 @@
         color: var(--text);
         text-align: inherit;
         font: inherit;
-        font-size: 10pt;
+        font-size: var(--font-size-mobile);
         text-transform: inherit;
         text-decoration: none;
         appearance: none;
@@ -709,6 +709,51 @@
         transform: translateZ(0) scale(1);
         will-change: transform, opacity, filter;
         backface-visibility: hidden;
+        position: relative;
+      }
+
+      .mobile-stack-arrow-btn {
+        position: absolute;
+        top: 50%;
+        right: 0px;
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+        min-height: 32px;
+        max-width: 32px;
+        max-height: 32px;
+        background: none;
+        border: none;
+        outline: none;
+        padding: 0;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1;
+        color: inherit;
+        cursor: pointer;
+        transition: background 0.15s, color 0.15s;
+        transform: translateY(-50%);
+      }
+      .mobile-stack-arrow-btn svg {
+        width: 24px;
+        height: 24px;
+        display: block;
+      }
+      .mobile-stack-item-work.is-active .mobile-stack-arrow-btn {
+        color: var(--accent);
+      }
+      .mobile-stack-arrow-btn:active,
+      .mobile-stack-arrow-btn:focus {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+      }
+      .mobile-stack-item-work .mobile-stack-arrow-btn {
+        /* Only visible when .is-active */
+        display: none;
+      }
+      .mobile-stack-item-work.is-active .mobile-stack-arrow-btn {
+        display: flex;
       }
 
       .mobile-stack-item-toggle {
@@ -716,7 +761,7 @@
         -webkit-appearance: none;
         border: var(--mobile-border);
         font: inherit;
-        font-size: 10pt;
+        font-size: var(--font-size-mobile);
         text-transform: inherit;
         text-decoration: none;
         background: color-mix(in srgb, var(--text) 4%, var(--bg));
@@ -743,6 +788,9 @@
     .mobile-stack-item-work {
       cursor: pointer;
       text-align: left;
+      position: relative;
+      /* for the arrow positioning */
+ 
     }
 
     .mobile-stack-item-work.is-active {
@@ -919,12 +967,27 @@
       const contentItems = document.querySelectorAll('.content-grid .item');
 
       let activeWorkItem = null;
-
       let activeImageIndex = 0;
-
       let galleryTimeout = null;
-
       const galleryTimeoutMs = 5000;
+
+      // Helper: create an arrow button
+      function createMobileArrowBtn(href) {
+        const btn = document.createElement('button');
+        btn.type = "button";
+        btn.className = "mobile-stack-arrow-btn";
+        btn.title = "Open project";
+        btn.tabIndex = 0;
+        btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none"><path d="M7 17L17 7M17 7H7M17 7V17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (href && href !== '#') window.open(href, '_blank');
+        });
+        btn.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+        });
+        return btn;
+      }
 
       function showHeroGallery(imgSrc, title, workItem) {
 
@@ -950,6 +1013,9 @@
 
           activeWorkItem.classList.remove('is-active');
 
+          // Remove any arrow from previously active item
+          const prevArrow = activeWorkItem.querySelector('.mobile-stack-arrow-btn');
+          if (prevArrow) prevArrow.remove();
         }
 
         if (workItem) {
@@ -985,11 +1051,11 @@
         heroGallery.setAttribute('aria-hidden', 'true');
 
         if (activeWorkItem) {
-
           activeWorkItem.classList.remove('is-active');
-
+          // Remove arrow icon from previously active
+          const prevArrow = activeWorkItem.querySelector('.mobile-stack-arrow-btn');
+          if (prevArrow) prevArrow.remove();
           activeWorkItem = null;
-
         }
 
         activeImageIndex = 0;
@@ -998,120 +1064,103 @@
 
       if (mobileStack && contentItems.length > 0) {
 
+        // Store for removal when a new item is selected
+        let lastArrowBtn = null;
+
         contentItems.forEach(item => {
-
           const subtitle = item.getAttribute('data-subtitle');
-
           if (!subtitle) return;
 
           const listItem = document.createElement('div');
-
           listItem.className = 'mobile-stack-item mobile-stack-item-work';
-
           listItem.textContent = subtitle;
-
           listItem.setAttribute('role', 'button');
-
           listItem.tabIndex = 0;
 
           const link = item.querySelector('a');
-
           const images = Array.from(item.querySelectorAll('img'));
+          let href = link && link.getAttribute('href');
+          // Don't offer an arrow for items without a link
+          if (!href) href = null;
 
           if (images.length > 0) {
 
             const imageSources = images
-
               .map(img => img.currentSrc || img.src)
-
               .filter(Boolean);
 
             listItem.dataset.imgSrc = imageSources[0];
-
             listItem.dataset.subtitle = subtitle;
+            listItem.dataset.linkHref = href || '';
 
+            // Add arrow only on selection
             const activateItem = () => {
-
               if (activeWorkItem !== listItem) {
+                // Deselect old
+                if (activeWorkItem) {
+                  activeWorkItem.classList.remove('is-active');
+                  const prevArrow = activeWorkItem.querySelector('.mobile-stack-arrow-btn');
+                  if (prevArrow) prevArrow.remove();
+                }
 
                 activeImageIndex = 0;
-
                 showHeroGallery(
-
                   imageSources[activeImageIndex],
-
                   subtitle,
-
                   listItem
-
                 );
 
+                // Only render the arrow button if a link is present
+                if (href) {
+                  // Remove other open arrow button
+                  if (lastArrowBtn) {
+                    lastArrowBtn.remove();
+                    lastArrowBtn = null;
+                  }
+                  const arrowBtn = createMobileArrowBtn(href);
+                  listItem.appendChild(arrowBtn);
+                  lastArrowBtn = arrowBtn;
+                }
                 return;
-
               }
 
               if (!heroGallery?.classList.contains('is-active')) {
-
                 activeImageIndex = 0;
-
                 showHeroGallery(
-
                   imageSources[activeImageIndex],
-
                   subtitle,
-
                   listItem
-
                 );
-
                 return;
-
               }
 
               if (imageSources.length > 1) {
-
                 activeImageIndex =
-
                   (activeImageIndex + 1) % imageSources.length;
-
                 showHeroGallery(
-
                   imageSources[activeImageIndex],
-
                   subtitle,
-
                   listItem
-
                 );
-
+                // Arrow should stay
                 return;
-
               }
 
               hideHeroGallery();
-
             };
 
             listItem.addEventListener('click', activateItem);
-
             listItem.addEventListener('keydown', event => {
-
               if (event.key === 'Enter' || event.key === ' ') {
-
                 event.preventDefault();
-
                 activateItem();
-
               }
-
             });
 
           } else if (link && !isMobile) {
 
             const activateItem = () => {
-
               window.open(link.href, '_blank');
-
             };
 
             listItem.addEventListener('click', activateItem);
@@ -1119,11 +1168,8 @@
             listItem.addEventListener('keydown', event => {
 
               if (event.key === 'Enter' || event.key === ' ') {
-
                 event.preventDefault();
-
                 activateItem();
-
               }
 
             });
@@ -1146,7 +1192,6 @@
 
       if (isSafari) {
         const overlay = document.getElementById('safari-overlay');
-
         if (overlay) {
           // On mobile Safari the overlay is visually hidden via CSS, so
           // remove it immediately and allow dark mode without a click.
@@ -1156,7 +1201,6 @@
           } else {
             overlay.addEventListener('click', () => {
               overlay.classList.add('hidden');
-
               // Delay full removal so transition completes
               setTimeout(() => {
                 overlay.remove();
