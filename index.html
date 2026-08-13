@@ -797,19 +797,17 @@
   </div>
 
   <div class="stack" id="stack">
-    <div class="bio-item">
-      <p><em>Carlos Franco</em> is a multidisciplinary artist and designer based in Texas</p>
-    </div>
+    <a class="bio-item" href="https://www.behance.net/crlos_frnc21ff" target="_blank">
+      <p><em>Carlos Franco</em> is a multidisciplinary artist and graphic designer based in <em>Texas</em></p>
+    </a>
     <div class="bio-item">
       <p>He studied arts and technology at <em>the university
           of texas at dallas</em> and has more than five years of exhibit design experience at <em>the perot museum of
           nature and science</em></p>
     </div>
-    <div class="bio-item">
-      <p>He has been practicing freelance graphic design since what is now known as Frutiger Aero</p>
-    </div>
+
     <div class="bio-item ">Space to toggle</div>
-    <button type="button" class="bio-item" href="mailto:design@carlosfran.co" target="_blank">Contact</a>
+    <a class="bio-item" href="mailto:design@carlosfran.co" target="_blank">Contact</a>
   </div>
 
   <div class="scroll-container">
@@ -1327,8 +1325,10 @@
         const navbar = document.querySelector('.navbar');
         const navbarVisible = !navbar?.classList.contains('scrolled');
 
+        // Add hover effect for .bio-item anchor tags (Behance and Contact)
         if (navbarVisible && (
           e.target.closest('ul a, .outro-text') ||
+          (e.target.closest('a.bio-item')) ||
           e.target.closest('button')
         )) {
           cursorWrapper.classList.add('cursor-hover-nav');
